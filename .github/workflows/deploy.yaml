@@ -28,7 +28,7 @@ jobs:
 
       - name: Deploy to Raspberry Pi
         run: |
-          sshpass -p "${{ secrets.SSH_KEY_PASSPHRASE }}" ssh ${{ secrets.SSH_USERNAME }}@ssh.flamingo-lindo.com.br "
+          ssh ${{ secrets.SSH_USERNAME }}@ssh.flamingo-lindo.com.br "
             cd /home/flamingopi/Documents/..Dev &&
             git pull origin main &&
             docker compose build &&
