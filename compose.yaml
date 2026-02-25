@@ -4,10 +4,12 @@ services:
     restart: always
     volumes:
       - ./nginx/default.conf:/tmp/default.conf
+      - ./nginx/ssl:/etc/nginx/ssl:ro
     environment: 
       - FLASK_SERVER_ADDR=flask-app:8000
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - flask-app
     healthcheck:
