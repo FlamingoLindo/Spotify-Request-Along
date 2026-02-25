@@ -16,17 +16,19 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          eval $(ssh-agent -s)
-          echo "${{ secrets.SSH_KEY }}" | ssh-add - <<< "${{ secrets.SSH_KEY_PASSPHRASE }}"
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "" >> ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
           cat >> ~/.ssh/config <<EOF
           Host ssh.flamingo-lindo.com.br
             ProxyCommand /usr/local/bin/cloudflared access ssh --hostname %h
             StrictHostKeyChecking no
+            IdentityFile ~/.ssh/id_rsa
           EOF
 
       - name: Deploy to Raspberry Pi
         run: |
-          ssh ${{ secrets.SSH_USERNAME }}@ssh.flamingo-lindo.com.br "
+          sshpass -p "${{ secrets.SSH_KEY_PASSPHRASE }}" ssh ${{ secrets.SSH_USERNAME }}@ssh.flamingo-lindo.com.br "
             cd /home/flamingopi/Documents/..Dev &&
             git pull origin main &&
             docker compose build &&
