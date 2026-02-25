@@ -8,13 +8,12 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: spotify-prod
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Deploy to raspberrypi
         uses: appleboy/ssh-action@master
         with:
           host:      ${{ secrets.SSH_HOST_PROD }}
-          username:  r${{ secrets.SSH_USERNAME }}t
+          username:  ${{ secrets.SSH_USERNAME }}t
           key:       ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_KEY_PASSPHRASE }}
           script: |
