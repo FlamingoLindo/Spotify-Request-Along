@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      keywords="keywords"
+      content="Twitch, Spotify, Python, Flask, Oauth2, Requests, API, Tailwind"
+    />
+    <meta name="Author" content="https://github.com/FlamingoLindo" />
+    <meta name="description" content="Free Web tutorials" />
+
+    <link
+      rel="stylesheet"
+      href="{{url_for('static',filename='dist/output.css')}}"
+    />
+    <link rel="icon" type="image/x-icon" href="static\buh.ico" />
+
+    <title>Request Along</title>
+  </head>
+
+  <body class="bg-[#181818] font-sans">
+    <div class="flex justify-center">
+      <h1
+        class="mt-2.5 text-[#9146ff] text-6xl underline decoration-wavy decoration-[#9146ff]/70 text-shadow-md text-shadow-white"
+      >
+        Request Along
+      </h1>
+    </div>
+
+    <div class="flex justify-center mt-10">
+      <form class="relative w-full max-w-md">
+        <span
+          class="absolute inset-y-0 left-4 flex items-center text-[#9146ff]"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+            />
+          </svg>
+        </span>
+        <input
+          placeholder="Search a track..."
+          class="w-full pl-12 pr-4 py-3 text-white bg-[#2a2a2a] border border-[#9146ff]/40 hover:border-[#9146ff] focus:border-[#9146ff] focus:outline-none rounded-full shadow-lg shadow-[#9146ff]/10 transition-all duration-300 placeholder-gray-500"
+        />
+      </form>
+    </div>
+  </body>
+</html>

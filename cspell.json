@@ -3,11 +3,26 @@
     "ignorePaths": [
         ".gitignore",
         ".env",
-        "example.env"
+        "example.env",
+        "flask/Dockerfile",
+        "nginx/Dockerfile",
+        "nginx/nginx.conf",
+        "nginx/start.sh",
+        "compose.yaml"
     ],
     "dictionaryDefinitions": [],
     "dictionaries": [],
-    "words": [],
+    "words": [
+        "appleboy",
+        "dotenv",
+        "flamingopi",
+        "fullchain",
+        "lindo",
+        "nosniff",
+        "privkey",
+        "raspberrypi",
+        "SAMEORIGIN"
+    ],
     "ignoreWords": [],
     "import": []
 }
