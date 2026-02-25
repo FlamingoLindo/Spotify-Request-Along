@@ -4,6 +4,7 @@ services:
     restart: always
     volumes:
       - ./nginx/default.conf:/tmp/default.conf
+      - ./flask/static:/home/app/static:ro
     environment: 
       - FLASK_SERVER_ADDR=flask-app:8000
     ports:
