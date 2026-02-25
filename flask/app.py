@@ -66,4 +66,13 @@ def authenticate():
         return f"Error: {str(e)}", 400
 
 
+@app.route("/flask-health-check")
+def health_check():
+    """Health check endpoint for Docker
+    Returns:
+        Response: Simple success message
+    """
+    return "OK", 200
+
+
 app.register_blueprint(spotify)
