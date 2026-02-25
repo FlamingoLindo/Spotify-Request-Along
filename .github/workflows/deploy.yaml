@@ -29,7 +29,7 @@ jobs:
       - name: Deploy to Raspberry Pi
         run: |
           ssh ${{ secrets.SSH_USERNAME }}@ssh.flamingo-lindo.com.br "
-            cd '/home/flamingopi/Documents/..Dev' &&
+            cd '/home/flamingopi/Documents/..Dev/Spotify-Request-Along' &&
             git pull origin main &&
             docker compose build &&
             docker compose up -d --remove-orphans
