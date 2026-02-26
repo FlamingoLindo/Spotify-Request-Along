@@ -4,7 +4,7 @@
         _type_: _description_
 """
 from spotify.connect import get_oauth2_url, exchange_code_for_token
-from flask import Flask, render_template, redirect, request, Blueprint
+from flask import Flask, render_template, redirect, request, Blueprint, url_for
 
 
 app = Flask(__name__)
@@ -62,7 +62,7 @@ def authenticate():
     try:
         access_token = exchange_code_for_token(redirect_url)
 
-        return redirect('home.html')
+        return redirect(url_for('spotify.home'))
     except Exception as e:
         return f"Error: {str(e)}", 400
 
