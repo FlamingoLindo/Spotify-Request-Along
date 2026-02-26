@@ -12,16 +12,6 @@ app = Flask(__name__)
 spotify = Blueprint('spotify', __name__, url_prefix='/spotify')
 
 
-@spotify.route("/startup")
-def startup():
-    """_summary_
-
-    Returns:
-        _type_: _description_
-    """
-    return render_template("startup.html")
-
-
 @spotify.route("/")
 def home():
     """_summary_
@@ -30,6 +20,16 @@ def home():
         _type_: _description_
     """
     return render_template("home.html")
+
+
+@spotify.route("/startup")
+def startup():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
+    return render_template("startup.html")
 
 
 @spotify.route("/startup/start", methods=["POST"])
@@ -62,18 +62,8 @@ def authenticate():
     try:
         access_token = exchange_code_for_token(redirect_url)
 
-        return f"Success! Token: {access_token}"
+        return redirect('home.html')
     except Exception as e:
         return f"Error: {str(e)}", 400
-
-
-@app.route("/flask-health-check")
-def health_check():
-    """Health check endpoint for Docker
-    Returns:
-        Response: Simple success message
-    """
-    return "OK", 200
-
 
 app.register_blueprint(spotify)
