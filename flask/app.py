@@ -61,7 +61,7 @@ def authenticate():
     redirect_url = request.form.get("redirect_url")
     try:
         access_token = exchange_code_for_token(redirect_url)
-        # Store token in session or database
+
         return f"Success! Token: {access_token}"
     except Exception as e:
         return f"Error: {str(e)}", 400

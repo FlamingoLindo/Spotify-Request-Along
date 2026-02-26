@@ -21,6 +21,15 @@ services:
     restart: always
     ports: 
       - '8000:8000'
+    environment:
+      - TOKEN_NAME=${TOKEN_NAME}
+      - GRANT_TYPE=${GRANT_TYPE}
+      - CALLBACK_URL=${CALLBACK_URL}
+      - AUTH_URL=${AUTH_URL}
+      - ACCESS_TOKEN_URL=${ACCESS_TOKEN_URL}
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - PLAYLIST_ID=${PLAYLIST_ID}
     healthcheck:
       test: ["CMD-SHELL", "curl --silent --fail localhost:8000/flask-health-check || exit 1"]
       interval: 10s
