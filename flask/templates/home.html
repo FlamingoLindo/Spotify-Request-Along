@@ -4,17 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
-      keywords="keywords"
+      name="keywords"
       content="Twitch, Spotify, Python, Flask, Oauth2, Requests, API, Tailwind"
     />
-    <meta name="Author" content="https://github.com/FlamingoLindo" />
-    <meta name="description" content="Free Web tutorials" />
+    <meta name="author" content="https://github.com/FlamingoLindo" />
+    <meta
+      name="description"
+      content="Request Along: search Spotify tracks and open them quickly."
+    />
 
     <link
       rel="stylesheet"
       href="{{url_for('static',filename='styles/home.css')}}"
     />
-
     <link
       rel="icon"
       type="image/x-icon"
@@ -25,86 +27,113 @@
   </head>
 
   <body>
-    <div class="title-wrapper">
-      <h1 class="title">Request Along</h1>
-    </div>
-    <div class="search-wrapper">
-      <form class="search-form">
-        <span class="search-icon">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
-            />
-          </svg>
-        </span>
-        <input class="search-input" placeholder="Search a track..." />
-      </form>
+    <main class="page">
+      <header class="title-wrapper">
+        <h1 class="title">Request Along</h1>
+      </header>
 
-      <div id="results"></div>
-    </div>
-  </body>
-</html>
+      <section class="search-wrapper">
+        <form class="search-form" autocomplete="off">
+          <span class="search-icon" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="w-5 h-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+              />
+            </svg>
+          </span>
 
-<script>
-  const input = document.querySelector(".search-input");
-  const resultsDiv = document.getElementById("results");
-  let debounceTimer;
-  let controller;
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search a track..."
+            aria-label="Search a track"
+            onkeydown="return event.key != 'Enter';"
+          />
+        </form>
 
-  input.addEventListener("input", () => {
-    clearTimeout(debounceTimer);
-    if (controller) controller.abort();
+        <!-- REQUIRED: where JS renders results -->
+        <div id="results"></div>
+      </section>
+    </main>
 
-    const query = input.value.trim();
+    <script>
+      const input = document.querySelector(".search-input");
+      const resultsDiv = document.getElementById("results");
+      let debounceTimer;
+      let controller;
 
-    if (!query) {
-      resultsDiv.innerHTML = "";
-      return;
-    }
+      // Guard: if results container is missing, fail loudly in console
+      if (!resultsDiv) {
+        console.error('Missing <div id="results"></div> in the HTML.');
+      }
 
-    debounceTimer = setTimeout(async () => {
-      resultsDiv.innerHTML = `<p class="results-status">Searching...</p>`;
-      controller = new AbortController();
+      input.addEventListener("input", () => {
+        if (!resultsDiv) return;
 
-      try {
-        const res = await fetch(
-          `/spotify/search?q=${encodeURIComponent(query)}`,
-          { signal: controller.signal },
-        );
-        const tracks = await res.json();
+        clearTimeout(debounceTimer);
+        if (controller) controller.abort();
 
-        if (!tracks.length) {
-          resultsDiv.innerHTML = `<p class="results-status">No results found.</p>`;
+        const query = input.value.trim();
+
+        if (!query) {
+          resultsDiv.innerHTML = "";
           return;
         }
 
-        resultsDiv.innerHTML = tracks
-          .map(
-            (t) => `
-          <a class="track-card" href="${t.url}" target="_blank" rel="noopener noreferrer">
-            ${t.image ? `<img src="${t.image}" alt="${t.name}">` : ""}
-            <div class="track-info">
-              <span class="track-name">${t.name}</span>
-              <span class="track-sub">${t.artist} · ${t.album}</span>
-            </div>
-          </a>
-        `,
-          )
-          .join("");
-      } catch (e) {
-        if (e.name !== "AbortError") {
-          resultsDiv.innerHTML = `<p class="results-status">Something went wrong.</p>`;
-        }
-      }
-    }, 400);
-  });
-</script>
+        debounceTimer = setTimeout(async () => {
+          resultsDiv.innerHTML = `<p class="results-status">Searching...</p>`;
+          controller = new AbortController();
+
+          try {
+            const res = await fetch(
+              `/spotify/search?q=${encodeURIComponent(query)}`,
+              { signal: controller.signal },
+            );
+
+            if (!res.ok) throw new Error("Bad response");
+
+            const tracks = await res.json();
+
+            if (!tracks.length) {
+              resultsDiv.innerHTML = `<p class="results-status">No results found.</p>`;
+              return;
+            }
+
+            resultsDiv.innerHTML = tracks
+              .map(
+                (t) => `
+                  <a class="track-card" href="${t.url}" target="_blank" rel="noopener noreferrer">
+                    ${
+                      t.image
+                        ? `<img src="${t.image}" alt="${t.name} album art" loading="lazy">`
+                        : `<div class="track-fallback" aria-hidden="true">♪</div>`
+                    }
+                    <div class="track-info">
+                      <span class="track-name">${t.name}</span>
+                      <span class="track-sub">${t.artist} · ${t.album}</span>
+                    </div>
+                    <span class="track-meta" aria-hidden="true">Open</span>
+                  </a>
+                `,
+              )
+              .join("");
+          } catch (e) {
+            if (e.name !== "AbortError") {
+              resultsDiv.innerHTML = `<p class="results-status">Something went wrong.</p>`;
+              console.error(e);
+            }
+          }
+        }, 400);
+      });
+    </script>
+  </body>
+</html>

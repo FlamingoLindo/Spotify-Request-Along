@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="stylesheet"
-      href="{{url_for('static',filename='styles/home.css')}}"
+      href="{{url_for('static',filename='styles/error.css')}}"
     />
     <link
       rel="icon"
@@ -16,9 +16,15 @@
   </head>
 
   <body>
-    <div class="title-wrapper">
-      <h1 class="title">There has been an error!</h1>
+    <main class="page">
+      <div class="title-wrapper">
+        <h1 class="title">There has been an error!</h1>
 
-      <h2>{{error}}</h2>
-    </div>
+        <div class="error-card" role="alert" aria-live="polite">
+          <div class="error-label">Details</div>
+          <h2 class="error-text">{{error}}</h2>
+        </div>
+      </div>
+    </main>
+  </body>
 </html>

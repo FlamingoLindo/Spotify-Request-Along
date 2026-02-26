@@ -1,0 +1,101 @@
+/* ── Base ── */
+:root {
+  --bg: #181818;
+  --accent: #9146ff;
+  --text: #f2f2f2;
+  --muted: rgba(242, 242, 242, 0.72);
+  --card: rgba(255, 255, 255, 0.06);
+  --card-border: rgba(255, 255, 255, 0.12);
+  --glow: rgba(145, 70, 255, 0.35);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  font-family: sans-serif;
+  color: var(--text);
+}
+
+/* ── Page container ── */
+.page {
+  min-height: 100%;
+  padding: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ── Title wrapper ── */
+.title-wrapper {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+/* ── Title ── */
+.title {
+  margin: 10px 0 0;
+  color: var(--accent);
+  font-size: clamp(2.2rem, 4.5vw, 3.75rem);
+  line-height: 1.05;
+  text-align: center;
+
+  text-shadow:
+    0 2px 4px rgba(255, 255, 255, 0.85),
+    0 0 22px var(--glow);
+}
+
+/* ── Error card ── */
+.error-card {
+  width: min(820px, 100%);
+  padding: 18px 18px 16px;
+  border-radius: 14px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(145, 70, 255, 0.06) inset;
+  backdrop-filter: blur(8px);
+}
+
+.error-label {
+  font-size: 0.85rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.error-text {
+  margin: 0;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+  line-height: 1.45;
+  color: var(--text);
+
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title {
+    text-shadow:
+      0 2px 4px rgba(255, 255, 255, 0.85),
+      0 0 16px var(--glow);
+  }
+}

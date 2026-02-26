@@ -79,6 +79,11 @@ def authenticate():
 
 @spotify.route("/search")
 def search_tracks():
+    """_summary_
+
+    Returns:
+        _type_: _description_
+    """
     query = request.args.get("q", "").strip()
     if not query:
         return jsonify([])
