@@ -48,7 +48,8 @@ def get_code():
     Returns:
         Response: Rendered template
     """
-    return render_template("get-code.html")
+    full_url = request.url
+    return render_template("get-code.html", redirect_url=full_url)
 
 
 @spotify.route("/oauth2/authenticate", methods=["POST"])

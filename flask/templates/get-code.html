@@ -3,7 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{{url_for('static',filename='styles/get-code.css')}}" />
+    <link
+      rel="stylesheet"
+      href="{{url_for('static',filename='styles/get-code.css')}}"
+    />
     <link
       rel="icon"
       type="image/x-icon"
@@ -22,6 +25,7 @@
           name="redirect_url"
           type="text"
           placeholder="Paste the redirect URL here"
+          value="{{ redirect_url }}"
           required
           class="auth-input"
         />
