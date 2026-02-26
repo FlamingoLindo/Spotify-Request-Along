@@ -48,6 +48,63 @@
         </span>
         <input class="search-input" placeholder="Search a track..." />
       </form>
+
+      <div id="results"></div>
     </div>
   </body>
 </html>
+
+<script>
+  const input = document.querySelector(".search-input");
+  const resultsDiv = document.getElementById("results");
+  let debounceTimer;
+  let controller;
+
+  input.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    if (controller) controller.abort();
+
+    const query = input.value.trim();
+
+    if (!query) {
+      resultsDiv.innerHTML = "";
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      resultsDiv.innerHTML = `<p class="results-status">Searching...</p>`;
+      controller = new AbortController();
+
+      try {
+        const res = await fetch(
+          `/spotify/search?q=${encodeURIComponent(query)}`,
+          { signal: controller.signal },
+        );
+        const tracks = await res.json();
+
+        if (!tracks.length) {
+          resultsDiv.innerHTML = `<p class="results-status">No results found.</p>`;
+          return;
+        }
+
+        resultsDiv.innerHTML = tracks
+          .map(
+            (t) => `
+          <a class="track-card" href="${t.url}" target="_blank" rel="noopener noreferrer">
+            ${t.image ? `<img src="${t.image}" alt="${t.name}">` : ""}
+            <div class="track-info">
+              <span class="track-name">${t.name}</span>
+              <span class="track-sub">${t.artist} · ${t.album}</span>
+            </div>
+          </a>
+        `,
+          )
+          .join("");
+      } catch (e) {
+        if (e.name !== "AbortError") {
+          resultsDiv.innerHTML = `<p class="results-status">Something went wrong.</p>`;
+        }
+      }
+    }, 400);
+  });
+</script>
