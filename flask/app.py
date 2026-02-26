@@ -4,19 +4,22 @@
         _type_: _description_
 """
 import os
+import redis
 from requests.exceptions import RequestException
 from oauthlib.oauth2 import OAuth2Error
 from spotify.connect import get_oauth2_url, exchange_code_for_token, get_token
 from spotify.search_track import search
 from flask import Flask, render_template, redirect, request, Blueprint, url_for, jsonify
 
-_state = {
-    "token": None,
-    "oauth2": None,
-}
-
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+
+# Connect to Redis for global state across all workers
+redis_client = redis.Redis(
+    host=os.getenv("REDIS_HOST", "localhost"),
+    port=int(os.getenv("REDIS_PORT", 6379)),
+    decode_responses=True
+)
 
 spotify = Blueprint('spotify', __name__, url_prefix='/spotify')
 
@@ -69,8 +72,11 @@ def authenticate():
     """
     redirect_url = request.form.get("redirect_url")
     try:
-        _state["oauth2"] = exchange_code_for_token(redirect_url)
-        _state["token"] = get_token()
+        oauth2_data = exchange_code_for_token(redirect_url)
+        token = get_token()
+        # Store globally in Redis (accessible by all workers)
+        redis_client.set("spotify_token", token)
+        redis_client.set("spotify_oauth2", str(oauth2_data))
         return redirect(url_for('spotify.home'))
     except OAuth2Error as e:
         return render_template('error.html', error=f"OAuth2 error: {str(e)}")
@@ -88,9 +94,11 @@ def search_tracks():
     query = request.args.get("q", "").strip()
     if not query:
         return jsonify([])
-    if not _state["token"]:
+    # Get token from Redis (global across all workers)
+    token = redis_client.get("spotify_token")
+    if not token:
         return jsonify({"error": "Not authenticated"}), 401
-    data = search(query, _state["token"])
+    data = search(query, token)
     tracks = data.get("tracks", {}).get("items", [])
     results = [
         {
