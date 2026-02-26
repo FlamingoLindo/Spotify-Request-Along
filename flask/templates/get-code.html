@@ -3,33 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="{{url_for('static',filename='styles/get-code.css')}}" />
     <link
-      rel="stylesheet"
-      href="{{url_for('static',filename='dist/output.css')}}"
+      rel="icon"
+      type="image/x-icon"
+      href="{{url_for('static',filename='buh.ico')}}"
     />
-    <link rel="icon" type="image/x-icon" href="{{url_for('static',filename='buh.ico')}}" />
     <title>Request Along - Oauth2</title>
   </head>
-  <body class="bg-[#181818] font-sans">
-    <div class="flex flex-col items-center justify-center min-h-screen">
+  <body>
+    <div class="page-wrapper">
       <form
         action="{{ url_for('spotify.authenticate') }}"
         method="POST"
-        class="relative w-full max-w-md"
+        class="auth-form"
       >
         <input
           name="redirect_url"
           type="text"
           placeholder="Paste the redirect URL here"
           required
-          class="w-full pl-4 py-3 text-white bg-[#2a2a2a] border border-[#9146ff]/40 hover:border-[#9146ff] focus:border-[#9146ff] focus:outline-none rounded-xl transition-all duration-300 placeholder-gray-500 text-sm"
+          class="auth-input"
         />
-        <button
-          type="submit"
-          class="cursor-pointer mt-3 w-full py-3 text-white font-semibold bg-[#9146ff] hover:bg-[#7c2fe0] active:scale-95 rounded-xl shadow-lg shadow-[#9146ff]/30 transition-all duration-200 text-sm"
-        >
-          Authenticate
-        </button>
+        <button type="submit" class="auth-button">Authenticate</button>
       </form>
     </div>
   </body>

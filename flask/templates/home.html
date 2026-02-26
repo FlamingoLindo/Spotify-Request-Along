@@ -12,27 +12,25 @@
 
     <link
       rel="stylesheet"
-      href="{{url_for('static',filename='dist/output.css')}}"
+      href="{{url_for('static',filename='styles/home.css')}}"
     />
-    <link rel="icon" type="image/x-icon" href="{{url_for('static',filename='buh.ico')}}" />
+
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{url_for('static',filename='buh.ico')}}"
+    />
 
     <title>Request Along</title>
   </head>
 
-  <body class="bg-[#181818] font-sans">
-    <div class="flex justify-center">
-      <h1
-        class="mt-2.5 text-[#9146ff] text-6xl underline decoration-wavy decoration-[#9146ff]/70 text-shadow-md text-shadow-white"
-      >
-        Request Along
-      </h1>
+  <body>
+    <div class="title-wrapper">
+      <h1 class="title">Request Along</h1>
     </div>
-
-    <div class="flex justify-center mt-10">
-      <form class="relative w-full max-w-md">
-        <span
-          class="absolute inset-y-0 left-4 flex items-center text-[#9146ff]"
-        >
+    <div class="search-wrapper">
+      <form class="search-form">
+        <span class="search-icon">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="w-5 h-5"
@@ -48,10 +46,7 @@
             />
           </svg>
         </span>
-        <input
-          placeholder="Search a track..."
-          class="w-full pl-12 pr-4 py-3 text-white bg-[#2a2a2a] border border-[#9146ff]/40 hover:border-[#9146ff] focus:border-[#9146ff] focus:outline-none rounded-full shadow-lg shadow-[#9146ff]/10 transition-all duration-300 placeholder-gray-500"
-        />
+        <input class="search-input" placeholder="Search a track..." />
       </form>
     </div>
   </body>

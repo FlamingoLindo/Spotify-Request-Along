@@ -1,0 +1,42 @@
+/* ── Base ── */
+body {
+  background-color: #181818;
+  font-family: sans-serif;
+  margin: 0;
+}
+
+/* ── Page centering ── */
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* ── Start button ── */
+.start-button {
+  cursor: pointer;
+  margin-top: 0.75rem;
+  width: 24rem; /* w-96 */
+  padding: 0.75rem;
+  color: white;
+  font-weight: 600;
+  font-size: 0.875rem;
+  background-color: #16a34a; /* green-600 */
+  border: none;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+  box-sizing: border-box;
+}
+
+.start-button:hover {
+  background-color: #166534; /* green-800 */
+}
+
+.start-button:active {
+  transform: scale(0.95);
+}
