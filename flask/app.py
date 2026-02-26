@@ -3,6 +3,7 @@
     Returns:
         _type_: _description_
 """
+import os
 from requests.exceptions import RequestException
 from oauthlib.oauth2 import OAuth2Error
 from spotify.connect import get_oauth2_url, exchange_code_for_token, get_token
@@ -11,6 +12,7 @@ from flask import Flask, render_template, redirect, request, Blueprint, url_for,
 
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY")
 
 spotify = Blueprint('spotify', __name__, url_prefix='/spotify')
 
