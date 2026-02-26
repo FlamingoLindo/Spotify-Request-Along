@@ -10,8 +10,10 @@ from spotify.connect import get_oauth2_url, exchange_code_for_token, get_token
 from spotify.search_track import search
 from flask import Flask, render_template, redirect, request, Blueprint, url_for, jsonify
 
-_token = None
-_oauth2 = None
+_state = {
+    "token": None,
+    "oauth2": None,
+}
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
@@ -67,8 +69,8 @@ def authenticate():
     """
     redirect_url = request.form.get("redirect_url")
     try:
-        _oauth2 = exchange_code_for_token(redirect_url)
-        _token = get_token()
+        _state["oauth2"] = exchange_code_for_token(redirect_url)
+        _state["token"] = get_token()
         return redirect(url_for('spotify.home'))
     except OAuth2Error as e:
         return render_template('error.html', error=f"OAuth2 error: {str(e)}")
@@ -86,9 +88,9 @@ def search_tracks():
     query = request.args.get("q", "").strip()
     if not query:
         return jsonify([])
-    if not _token:
+    if not _state["token"]:
         return jsonify({"error": "Not authenticated"}), 401
-    data = search(query, _token)
+    data = search(query, _state["token"])
     tracks = data.get("tracks", {}).get("items", [])
     results = [
         {

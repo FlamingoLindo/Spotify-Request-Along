@@ -60,7 +60,6 @@
           />
         </form>
 
-        <!-- REQUIRED: where JS renders results -->
         <div id="results"></div>
       </section>
     </main>
@@ -71,7 +70,6 @@
       let debounceTimer;
       let controller;
 
-      // Guard: if results container is missing, fail loudly in console
       if (!resultsDiv) {
         console.error('Missing <div id="results"></div> in the HTML.');
       }
