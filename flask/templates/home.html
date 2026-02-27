@@ -70,6 +70,14 @@
       let debounceTimer;
       let controller;
 
+      function playTrack(uri) {
+        fetch(`/spotify/play/${uri}`, { method: "POST" })
+          .then((res) => {
+            if (res.ok || res.redirected) window.location.href = res.url;
+          })
+          .catch((e) => console.error("Playback error:", e));
+      }
+
       if (!resultsDiv) {
         console.error('Missing <div id="results"></div> in the HTML.');
       }
@@ -119,7 +127,7 @@
                       <span class="track-name">${t.name}</span>
                       <span class="track-sub">${t.artist} · ${t.album}</span>
                     </div>
-                    <span class="track-meta" aria-hidden="true" onclick="{{ url_for('spotify.play_track(${t.uri})') }}">Play</span>
+                    <span class="track-meta" aria-hidden="true" onclick="event.preventDefault(); event.stopPropagation(); playTrack('${encodeURIComponent(t.uri)}')">Play</span>
                   </a>
                 `,
               )

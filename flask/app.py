@@ -103,6 +103,7 @@ def search_tracks():
     tracks = data.get("tracks", {}).get("items", [])
     results = [
         {
+            "uri": t["uri"],
             "name": t["name"],
             "artist": t["artists"][0]["name"],
             "album": t["album"]["name"],
