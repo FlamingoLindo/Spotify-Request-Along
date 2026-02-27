@@ -65,6 +65,6 @@ def add_track(oauth2: str, uri: str):
             ],
             "position": 0
         },
-        timeout=1
+        timeout=5
     )
     return response
