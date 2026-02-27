@@ -12,6 +12,7 @@ from spotify.search_track import search
 from spotify.player import play_new_track
 from spotify.devices import available_devices
 from spotify.playlist import add_track
+from spotify.queue import get_queue, add_to_the_queue
 from flask import Flask, render_template, redirect, request, Blueprint, url_for, jsonify
 
 app = Flask(__name__)
@@ -132,8 +133,15 @@ def play_track(uri: str):
             return jsonify({"error": "Not authenticated"}), 401
 
         device = available_devices(oauth2=oauth2)
-        play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
         add_track(oauth2=oauth2, uri=uri)
+
+        queue = get_queue(oauth2=oauth2)
+
+        if not queue['currently_playing']:
+            play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
+        else:
+            add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
+
         return jsonify({"status": "ok"}), 200
     except OAuth2Error as e:
         return render_template('error.html', error=f"OAuth2 error: {str(e)}")
