@@ -132,7 +132,6 @@ def play_track(uri: str):
 
         device = available_devices(oauth2=oauth2)
         play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
-        return redirect(url_for('spotify.home'))
     except OAuth2Error as e:
         return render_template('error.html', error=f"OAuth2 error: {str(e)}")
     except RequestException as e:
