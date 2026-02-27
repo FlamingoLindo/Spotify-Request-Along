@@ -15,7 +15,7 @@ def get_queue(oauth2: str):
     response = requests.get(
         "https://api.spotify.com/v1/me/player/queue",
         headers={"Authorization": f"Bearer {oauth2}"},
-        timeout=1
+        timeout=5
     )
     response.raise_for_status()
     data = response.json()
