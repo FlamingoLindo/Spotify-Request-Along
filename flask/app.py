@@ -9,15 +9,16 @@ from requests.exceptions import RequestException
 from oauthlib.oauth2 import OAuth2Error
 from spotify.connect import get_oauth2_url, exchange_code_for_token, get_token
 from spotify.search_track import search
+from spotify.player import play_new_track
+from spotify.devices import available_devices
 from flask import Flask, render_template, redirect, request, Blueprint, url_for, jsonify
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
-# Connect to Redis for global state across all workers
 redis_client = redis.Redis(
     host=os.getenv("REDIS_HOST", "localhost"),
-    port=int(os.getenv("REDIS_PORT", 6379)),
+    port=int(os.getenv("REDIS_PORT", 6379)),  # pylint: disable=W1508
     decode_responses=True
 )
 
@@ -111,6 +112,30 @@ def search_tracks():
         for t in tracks
     ]
     return jsonify(results)
+
+
+@spotify.route("/play/<uri>", methods=["POST"])
+def play_track(uri: str):
+    """_summary_
+
+    Args:
+        uri (str): _description_
+
+    Returns:
+        _type_: _description_
+    """
+    try:
+        oauth2 = redis_client.get("spotify_oauth2")
+        if not oauth2:
+            return jsonify({"error": "Not authenticated"}), 401
+
+        device = available_devices(oauth2=oauth2)
+        play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
+        return redirect(url_for('spotify.home'))
+    except OAuth2Error as e:
+        return render_template('error.html', error=f"OAuth2 error: {str(e)}")
+    except RequestException as e:
+        return render_template('error.html', error=f"Request error: {str(e)}")
 
 
 app.register_blueprint(spotify)
