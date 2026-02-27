@@ -73,7 +73,11 @@
       function playTrack(uri) {
         fetch(`/spotify/play/${uri}`, { method: "PUT" })
           .then((res) => {
-            if (res.ok || res.redirected) window.location.href = res.url;
+            if (res.ok) {
+              console.log("Track is playing!");
+            } else {
+              console.error("Playback failed:", res.status);
+            }
           })
           .catch((e) => console.error("Playback error:", e));
       }
