@@ -115,7 +115,7 @@ def search_tracks():
     return jsonify(results)
 
 
-@spotify.route("/play/<uri>", methods=["POST"])
+@spotify.route("/play/<uri>", methods=["PUT"])
 def play_track(uri: str):
     """_summary_
 
