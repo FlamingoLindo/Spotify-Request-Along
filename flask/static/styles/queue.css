@@ -1,0 +1,93 @@
+/* ── Section label ── */
+.section-label {
+  width: 100%;
+  max-width: 680px;
+  margin: 24px 0 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Queue list ── */
+.queue-list {
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ── Track card ── */
+.track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+  max-width: 680px;
+  transition:
+    background 0.18s,
+    border-color 0.18s;
+}
+
+.track:hover {
+  background: rgba(145, 70, 255, 0.12);
+  border-color: var(--accent);
+}
+
+/* Currently playing gets a glowing accent border */
+.track--current {
+  border-color: var(--accent);
+  box-shadow: 0 0 14px rgba(145, 70, 255, 0.25);
+}
+
+.track__img {
+  width: 58px;
+  height: 58px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.track__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.track__name {
+  font-size: 0.97rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track__artist {
+  font-size: 0.82rem;
+  color: var(--accent);
+}
+
+.track__album {
+  font-size: 0.78rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Empty state ── */
+.empty {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 20px 0;
+}

@@ -224,3 +224,49 @@ body {
     height: 2.75rem;
   }
 }
+
+/* ── Queue / Playlist nav ── */
+.nav-section {
+  width: 100%;
+  max-width: 20rem;
+  margin-top: 1.25rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.nav-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  text-decoration: none;
+  color: inherit;
+  background: var(--panel);
+  border: 1px solid rgba(145, 70, 255, 0.18);
+  border-radius: 0.9rem;
+  padding: 0.5rem;
+  transition: border-color 0.18s ease, background-color 0.18s ease, transform 0.12s ease;
+}
+
+.nav-card:hover {
+  border-color: rgba(145, 70, 255, 0.6);
+  background-color: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.nav-card:active {
+  transform: translateY(0);
+}
+
+.nav-title {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text);
+  text-align: center;
+}
+
+@media (max-width: 420px) {
+  .nav-section {
+    grid-template-columns: 1fr;
+  }
+}

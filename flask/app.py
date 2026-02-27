@@ -149,4 +149,53 @@ def play_track(uri: str):
         return render_template('error.html', error=f"Request error: {str(e)}")
 
 
+@spotify.route("/queue")
+def queue_page():
+    """Display the queue page
+
+    Returns:
+        _type_: _description_
+    """
+
+    try:
+        oauth2 = redis_client.get("spotify_oauth2")
+        if not oauth2:
+            return jsonify({"error": "Not authenticated"}), 401
+
+        queue = get_queue(oauth2=oauth2)
+
+        current = queue['currently_playing']
+        current_track = {
+            "uri": current["uri"],
+            "name": current["name"],
+            "artist": current["artists"][0]["name"],
+            "album": current["album"]["name"],
+            "image": current["album"]["images"][1]["url"] if current["album"]["images"] else None,
+            "url": current["external_urls"]["spotify"],
+        }
+
+        tracks = [
+            {
+                "uri": t["uri"],
+                "name": t["name"],
+                "artist": t["artists"][0]["name"],
+                "album": t["album"]["name"],
+                "image": t["album"]["images"][1]["url"] if t["album"]["images"] else None,
+                "url": t["external_urls"]["spotify"],
+            }
+            for t in queue['queue']
+        ]
+
+        result = {
+            "current": current_track,
+            "tracks": tracks,
+        }
+
+        return render_template("queue.html", **result)
+    except OAuth2Error as e:
+        return render_template('error.html', error=f"OAuth2 error: {str(e)}")
+    except RequestException as e:
+        return render_template('error.html', error=f"Request error: {str(e)}")
+
+
 app.register_blueprint(spotify)

@@ -23,38 +23,6 @@ def get_queue(oauth2: str):
     if data['currently_playing'] is None:
         return []
 
-    current = data['currently_playing']
-
-    print("\nCurrently playing:")
-
-    print("ID: ", current["id"])
-    print("uri: ", current["uri"])
-
-    print("Artist: ", current["artists"][0]['name'])
-
-    print("Image: ", current["album"]["images"]
-          [0]["url"])
-
-    print("Name: ", current["name"])
-
-    print("Link: ", current["external_urls"]["spotify"])
-    print('*' * 10)
-
-    print("Next tracks:")
-    for track in data['queue']:
-        print("\nID: ", track["id"])
-        print("uri: ", track["uri"])
-
-        print("Artist: ", track["artists"][0]['name'])
-
-        print("Image: ", track["album"]["images"]
-              [0]["url"])
-
-        print("Name: ", track["name"])
-
-        print("Link: ", track["external_urls"]["spotify"])
-        print('*' * 10)
-
     return data
 
 

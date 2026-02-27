@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="keywords"
+      content="Twitch, Spotify, Python, Flask, Oauth2, Requests, API, Tailwind"
+    />
+    <meta name="author" content="https://github.com/FlamingoLindo" />
+    <meta
+      name="description"
+      content="Request Along: search Spotify tracks and open them quickly."
+    />
+    <link
+      rel="stylesheet"
+      href="{{url_for('static',filename='styles/queue.css')}}"
+    />
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{{url_for('static',filename='buh.ico')}}"
+    />
+    <title>Request Along - Queue</title>
+  </head>
+  <body>
+    <main class="page">
+      <header class="title-wrapper">
+        <h1 class="title">Queue</h1>
+      </header>
+
+      <section class="section-label">Now Playing</section>
+      <a class="track track--current" href="{{ current.url }}" target="_blank">
+        {% if current.image %}
+        <img
+          class="track__img"
+          src="{{ current.image }}"
+          alt="{{ current.album }}"
+        />
+        {% endif %}
+        <div class="track__info">
+          <span class="track__name">{{ current.name }}</span>
+          <span class="track__artist">{{ current.artist }}</span>
+          <span class="track__album">{{ current.album }}</span>
+        </div>
+      </a>
+
+      <section class="section-label">Up Next</section>
+      <div class="queue-list">
+        {% for track in tracks %}
+        <a class="track" href="{{ track.url }}" target="_blank">
+          {% if track.image %}
+          <img
+            class="track__img"
+            src="{{ track.image }}"
+            alt="{{ track.album }}"
+          />
+          {% endif %}
+          <div class="track__info">
+            <span class="track__name">{{ track.name }}</span>
+            <span class="track__artist">{{ track.artist }}</span>
+            <span class="track__album">{{ track.album }}</span>
+          </div>
+        </a>
+        {% else %}
+        <p class="empty">No tracks in queue.</p>
+        {% endfor %}
+      </div>
+    </main>
+  </body>
+</html>
