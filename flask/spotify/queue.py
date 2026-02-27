@@ -72,7 +72,7 @@ def add_to_the_queue(oauth2: str, uri: str, device_id: str):
     response = requests.post(
         "https://api.spotify.com/v1/me/player/queue",
         headers={"Authorization": f"Bearer {oauth2}"},
-        json={
+        params={
             "uri": uri,
             "device_id": device_id
         },
