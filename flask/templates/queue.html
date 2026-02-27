@@ -30,6 +30,7 @@
       </header>
 
       <section class="section-label">Now Playing</section>
+      {% if current %}
       <a class="track track--current" href="{{ current.url }}" target="_blank">
         {% if current.image %}
         <img
@@ -44,6 +45,9 @@
           <span class="track__album">{{ current.album }}</span>
         </div>
       </a>
+      {% else %}
+      <p class="empty">Nothing is currently playing.</p>
+      {% endif %}
 
       <section class="section-label">Up Next</section>
       <div class="queue-list">

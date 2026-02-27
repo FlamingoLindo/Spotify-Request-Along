@@ -164,6 +164,9 @@ def queue_page():
 
         queue = get_queue(oauth2=oauth2)
 
+        if not queue:
+            return render_template("queue.html", current=None, tracks=[])
+
         current = queue['currently_playing']
         current_track = {
             "uri": current["uri"],
@@ -173,7 +176,6 @@ def queue_page():
             "image": current["album"]["images"][1]["url"] if current["album"]["images"] else None,
             "url": current["external_urls"]["spotify"],
         }
-
         tracks = [
             {
                 "uri": t["uri"],
@@ -185,13 +187,7 @@ def queue_page():
             }
             for t in queue['queue']
         ]
-
-        result = {
-            "current": current_track,
-            "tracks": tracks,
-        }
-
-        return render_template("queue.html", **result)
+        return render_template("queue.html", current=current_track, tracks=tracks)
     except OAuth2Error as e:
         return render_template('error.html', error=f"OAuth2 error: {str(e)}")
     except RequestException as e:
