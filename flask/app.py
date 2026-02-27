@@ -137,7 +137,7 @@ def play_track(uri: str):
 
         queue = get_queue(oauth2=oauth2)
 
-        if not queue['currently_playing']:
+        if queue == []:
             play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
         else:
             add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
