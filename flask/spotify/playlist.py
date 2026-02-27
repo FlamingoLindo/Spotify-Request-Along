@@ -23,7 +23,7 @@ def get_playlist(oauth2: str, playlist_id: str):
             url,
             headers={"Authorization": f"Bearer {oauth2}"},
             params=params,
-            timeout=1
+            timeout=5
         )
         data = response.json()
         print(data)
@@ -35,7 +35,7 @@ def get_playlist(oauth2: str, playlist_id: str):
         params = None
 
     if not tracks:
-        return IndexError("There are no tracks in this playlist!")
+        return []
 
     return tracks
 
