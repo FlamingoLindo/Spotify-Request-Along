@@ -11,6 +11,7 @@ from spotify.connect import get_oauth2_url, exchange_code_for_token, get_token
 from spotify.search_track import search
 from spotify.player import play_new_track
 from spotify.devices import available_devices
+from spotify.playlist import add_track
 from flask import Flask, render_template, redirect, request, Blueprint, url_for, jsonify
 
 app = Flask(__name__)
@@ -132,6 +133,7 @@ def play_track(uri: str):
 
         device = available_devices(oauth2=oauth2)
         play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
+        add_track(oauth2=oauth2, uri=uri)
         return jsonify({"status": "ok"}), 200
     except OAuth2Error as e:
         return render_template('error.html', error=f"OAuth2 error: {str(e)}")
