@@ -15,6 +15,7 @@ from spotify.playlist import add_track
 from spotify.queue import get_queue, add_to_the_queue
 from flask import Flask, render_template, redirect, request, Blueprint, url_for, jsonify
 
+# FIXME async
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
 
