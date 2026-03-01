@@ -28,7 +28,7 @@ spotify = Blueprint('spotify', __name__, url_prefix='/spotify')
 
 
 @spotify.route("/")
-def home():
+async def home():
     """_summary_
 
     Returns:
@@ -88,7 +88,7 @@ def authenticate():
 
 
 @spotify.route("/search")
-def search_tracks():
+async def search_tracks():
     """_summary_
 
     Returns:
@@ -118,7 +118,7 @@ def search_tracks():
 
 
 @spotify.route("/play/<uri>", methods=["PUT"])
-def play_track(uri: str):
+async def play_track(uri: str):
     """_summary_
 
     Args:
@@ -150,7 +150,7 @@ def play_track(uri: str):
 
 
 @spotify.route("/queue")
-def queue_page():
+async def queue_page():
     """Display the queue page
 
     Returns:
