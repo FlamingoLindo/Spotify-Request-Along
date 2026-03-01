@@ -9,9 +9,10 @@ jobs:
       - name: Deploy
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.HOST }}
+          host: ssh.flamingo-lindo.com.br
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
+          proxy_host: ssh.flamingo-lindo.com.br
           script: |
             cd projects/Spotify-Request-Along/
             git pull
