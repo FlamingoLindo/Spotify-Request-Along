@@ -6,14 +6,18 @@ jobs:
     runs-on: ubuntu-latest
     environment: spotify-prod
     steps:
+      - name: Install cloudflared
+        run: |
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+          chmod +x cloudflared && sudo mv cloudflared /usr/local/bin
+
       - name: Deploy
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ssh.flamingo-lindo.com.br
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
-          proxy_host: ssh.flamingo-lindo.com.br
-          script: |
-            cd projects/Spotify-Request-Along/
-            git pull
-            docker compose up -d --build --remove-orphans
+        env:
+          SSHPASS: ${{ secrets.PASSWORD }}
+        run: |
+          sudo apt-get install -y sshpass
+          sshpass -e ssh \
+            -o ProxyCommand="cloudflared access ssh --hostname ssh.flamingo-lindo.com.br" \
+            -o StrictHostKeyChecking=no \
+            ${{ secrets.USERNAME }}@ssh.flamingo-lindo.com.br \
+            "cd projects/Spotify-Request-Along/ && git pull && docker compose up -d --build --remove-orphans"
