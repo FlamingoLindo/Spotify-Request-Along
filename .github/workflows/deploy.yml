@@ -12,9 +12,8 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
+          protocol: tcp6
           script: |
             cd projects/Spotify-Request-Along/
-
             git pull
-
             docker compose up -d --build --remove-orphans
