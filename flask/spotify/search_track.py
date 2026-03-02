@@ -21,7 +21,7 @@ def search(query: str, token: str):
             "https://api.spotify.com/v1/search",
             headers={"Authorization": f"Bearer {token}"},
             params={"q": query, "type": "track", "limit": 10},
-            timeout=1
+            timeout=10
         )
         response.raise_for_status()
         return response.json()

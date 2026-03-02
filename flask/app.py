@@ -119,7 +119,7 @@ async def search_tracks():
     if not query:
         return jsonify([])
 
-    token = redis_client.get("spotify_token")
+    token = redis_client.get("spotify_oauth2")
     if not token:
         return jsonify({"error": "Not authenticated"}), 401
 
