@@ -33,6 +33,8 @@ services:
       - '8000:8000'
     environment:
       - SECRET_KEY=${SECRET_KEY}
+      - U_LOGIN=${U_LOGIN}
+      - U_PASSWORD=${U_PASSWORD}
       - TOKEN_NAME=${TOKEN_NAME}
       - GRANT_TYPE=${GRANT_TYPE}
       - CALLBACK_URL=${CALLBACK_URL}
