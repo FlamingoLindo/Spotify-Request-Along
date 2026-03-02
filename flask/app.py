@@ -168,7 +168,7 @@ async def play_track(uri: str):
         else:
             add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
 
-        return jsonify({"status": "ok"}), 200
+        return redirect(url_for('spotify.home'))
     except OAuth2Error as e:
         return render_template('error.html', error=f"OAuth2 error: {str(e)}")
     except RequestException as e:
