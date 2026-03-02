@@ -16,6 +16,7 @@ from spotify.queue import get_queue, add_to_the_queue
 from flask import Flask, render_template, redirect, request, Blueprint, url_for, jsonify
 from flask_login import LoginManager, login_required
 from auth.auth import auth_bp
+from auth.models import get_user_by_id
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
@@ -25,6 +26,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'auth.login'
 login_manager.login_message = 'Please log in to access this page.'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    """Load user by ID for Flask-Login."""
+    return get_user_by_id(user_id)
 
 
 @login_manager.unauthorized_handler
