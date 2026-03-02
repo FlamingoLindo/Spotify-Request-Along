@@ -14,10 +14,24 @@ from spotify.devices import available_devices
 from spotify.playlist import add_track
 from spotify.queue import get_queue, add_to_the_queue
 from flask import Flask, render_template, redirect, request, Blueprint, url_for, jsonify
+from flask_login import LoginManager, login_required
+from auth.auth import auth_bp
 
-# FIXME async
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+
+# Initialize Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'auth.login'
+login_manager.login_message = 'Please log in to access this page.'
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    """Handle unauthorized access attempts."""
+    return redirect(url_for('auth.login'))
+
 
 redis_client = redis.Redis(
     host=os.getenv("REDIS_HOST", "localhost"),
@@ -39,6 +53,7 @@ async def home():
 
 
 @spotify.route("/startup")
+@login_required
 def startup():
     """_summary_
 
@@ -49,6 +64,7 @@ def startup():
 
 
 @spotify.route("/startup/start", methods=["POST"])
+@login_required
 def start_oauth():
     """Handle the Start button press and initiate OAuth2 flow
     Returns:
@@ -59,6 +75,7 @@ def start_oauth():
 
 
 @spotify.route("/oauth2")
+@login_required
 def get_code():
     """Display page for user to paste redirect URL
     Returns:
@@ -69,6 +86,7 @@ def get_code():
 
 
 @spotify.route("/oauth2/authenticate", methods=["POST"])
+@login_required
 def authenticate():
     """Exchange authorization code for token
     Returns:
@@ -195,4 +213,5 @@ async def queue_page():
         return render_template('error.html', error=f"Request error: {str(e)}")
 
 
+app.register_blueprint(auth_bp)
 app.register_blueprint(spotify)
