@@ -59,7 +59,7 @@ def get_token():
         "https://accounts.spotify.com/api/token",
         data={"grant_type": "client_credentials"},
         auth=(client_id, client_secret),
-        timeout=1
+        timeout=10
     )
     return response.json()["access_token"]
 

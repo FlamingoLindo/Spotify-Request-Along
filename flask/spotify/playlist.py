@@ -23,7 +23,7 @@ def get_playlist(oauth2: str, playlist_id: str):
             url,
             headers={"Authorization": f"Bearer {oauth2}"},
             params=params,
-            timeout=5
+            timeout=10
         )
         data = response.json()
         print(data)
@@ -65,6 +65,6 @@ def add_track(oauth2: str, uri: str):
             ],
             "position": 0
         },
-        timeout=5
+        timeout=10
     )
     return response

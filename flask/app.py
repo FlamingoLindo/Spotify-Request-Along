@@ -5,7 +5,7 @@
 """
 import os
 import redis
-from requests.exceptions import RequestException
+from requests.exceptions import ReadTimeout, RequestException
 from oauthlib.oauth2 import OAuth2Error
 from spotify.connect import get_oauth2_url, exchange_code_for_token, get_token
 from spotify.search_track import search
@@ -115,19 +115,21 @@ def authenticate():
 
 @spotify.route("/search")
 async def search_tracks():
-    """_summary_
-
-    Returns:
-        _type_: _description_
-    """
     query = request.args.get("q", "").strip()
     if not query:
         return jsonify([])
-    # Get token from Redis (global across all workers)
+
     token = redis_client.get("spotify_token")
     if not token:
         return jsonify({"error": "Not authenticated"}), 401
-    data = search(query, token)
+
+    try:
+        data = search(query, token)
+    except ReadTimeout:
+        return jsonify({"error": "Spotify request timed out, please try again"}), 504
+    except RequestException as e:
+        return jsonify({"error": f"Spotify API error: {str(e)}"}), 502
+
     tracks = data.get("tracks", {}).get("items", [])
     results = [
         {
@@ -168,11 +170,11 @@ async def play_track(uri: str):
         else:
             add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
 
-        return redirect(url_for('spotify.home'))
+        return jsonify({"success": True, "message": "Track added to queue"}), 200
     except OAuth2Error as e:
-        return render_template('error.html', error=f"OAuth2 error: {str(e)}")
+        return jsonify({"error": f"OAuth2 error: {str(e)}"}), 500
     except RequestException as e:
-        return render_template('error.html', error=f"Request error: {str(e)}")
+        return jsonify({"error": f"Request error: {str(e)}"}), 500
 
 
 @spotify.route("/queue")

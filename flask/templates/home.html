@@ -82,11 +82,15 @@
 
       function playTrack(uri) {
         fetch(`/spotify/play/${uri}`, { method: "PUT" })
-          .then((res) => {
-            if (res.ok) {
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
               console.log("Track is playing!");
+              // Clear the search input and results
+              input.value = "";
+              resultsDiv.innerHTML = "";
             } else {
-              console.error("Playback failed:", res.status);
+              console.error("Playback failed:", data.error);
             }
           })
           .catch((e) => console.error("Playback error:", e));

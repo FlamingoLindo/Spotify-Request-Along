@@ -13,7 +13,7 @@ def available_devices(oauth2: str):
     response = requests.get(
         "https://api.spotify.com/v1/me/player/devices",
         headers={"Authorization": f"Bearer {oauth2}"},
-        timeout=1
+        timeout=10
     )
     devices = [device["id"] for device in response.json()["devices"]]
 
