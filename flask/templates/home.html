@@ -89,12 +89,6 @@
           body: JSON.stringify({ name: name })
         })
           .then((res) => {
-            if (res.status === 409) {
-              return res.json().then(data => {
-                alert(data.message || "This track is already in the playlist!");
-                throw new Error("Duplicate track");
-              });
-            }
             if (res.status === 429) {
               return res.json().then(data => {
                 alert(data.error || "Too many requests. Please wait a moment and try again.");
@@ -110,7 +104,7 @@
           })
           .then((data) => {
             if (data.success) {
-              console.log("Track is playing!");
+              console.log(data.message || "Track is playing!");
               // Clear the search input and results
               input.value = "";
               resultsDiv.innerHTML = "";
@@ -119,7 +113,7 @@
             }
           })
           .catch((e) => {
-            if (e.message !== "Duplicate track" && e.message !== "Rate limited") {
+            if (e.message !== "Rate limited") {
               console.error("Playback error:", e);
               alert("Failed to play track: " + e.message);
             }

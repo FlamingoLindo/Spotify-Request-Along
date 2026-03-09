@@ -190,11 +190,9 @@ async def play_track(uri: str):
         # Check database and add track to playlist if new
         result = add_track(oauth2=oauth2, uri=uri, track_name=track_name)
         
-        # Handle duplicate tracks
-        if result.get("status") == "duplicate":
-            return jsonify({"success": False, "message": result.get("error")}), 409
+        is_duplicate = result.get("status") == "duplicate"
         
-        # Handle database errors
+        # Handle database errors (but not duplicates)
         if result.get("status") == "db_error":
             return jsonify({"error": result.get("error")}), 500
         
@@ -206,7 +204,7 @@ async def play_track(uri: str):
                 return jsonify({"error": "Spotify rate limit exceeded. Please wait a moment and try again."}), 429
             return jsonify({"error": error_message}), 500
 
-        # Add to queue or play
+        # Add to queue or play (even if duplicate)
         queue = get_queue(oauth2=oauth2)
 
         if queue == []:
@@ -214,7 +212,11 @@ async def play_track(uri: str):
         else:
             add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
 
-        return jsonify({"success": True, "message": "Track added to playlist and queue"}), 200
+        # Return appropriate message
+        if is_duplicate:
+            return jsonify({"success": True, "message": "Track already in playlist, added to queue"}), 200
+        else:
+            return jsonify({"success": True, "message": "Track added to playlist and queue"}), 200
     except OAuth2Error as e:
         return jsonify({"error": f"OAuth2 error: {str(e)}"}), 500
     except RequestException as e:
