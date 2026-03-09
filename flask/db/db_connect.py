@@ -31,26 +31,42 @@ def get_db_connection():
 
 def connect_to_db():
     """Initialize database and create tables if they don't exist."""
+    conn = None
     try:
-        print("Initializing database connection...")
+        print("Initializing database connection...", flush=True)
         conn = get_db_connection()
         cur = conn.cursor()
 
-        # Create tracks table
+        # Check if table already exists to avoid type conflicts
         cur.execute(
-            '''CREATE TABLE IF NOT EXISTS tracks (
-                id SERIAL PRIMARY KEY,
-                uri VARCHAR(350) UNIQUE NOT NULL,
-                name VARCHAR(350) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            );'''
+            """SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = 'tracks'
+            );"""
         )
-
-        conn.commit()
-        print("Database tables initialized successfully")
+        table_exists = cur.fetchone()[0]
+        
+        if not table_exists:
+            # Create tracks table
+            cur.execute(
+                '''CREATE TABLE IF NOT EXISTS tracks (
+                    id SERIAL PRIMARY KEY,
+                    uri VARCHAR(350) UNIQUE NOT NULL,
+                    name VARCHAR(350) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );'''
+            )
+            conn.commit()
+            print("Database table 'tracks' created successfully", flush=True)
+        else:
+            print("Database table 'tracks' already exists", flush=True)
 
         cur.close()
-        conn.close()
     except Exception as e:
-        print(f"Error initializing database: {e}", file=sys.stderr)
+        print(f"Error initializing database: {e}", file=sys.stderr, flush=True)
+        if conn:
+            conn.rollback()
         raise
+    finally:
+        if conn:
+            conn.close()

@@ -1,6 +1,7 @@
 """_summary_
     """
 import os
+import sys
 import requests
 from db.db_add_track import track_exists_in_db, db_add_track
 
@@ -62,19 +63,27 @@ def add_track(oauth2: str, uri: str, track_name: str):
 
     # Add track to Spotify playlist
     playlist_id = os.getenv("PLAYLIST_ID")
-    response = requests.post(
-        f"https://api.spotify.com/v1/playlists/{playlist_id}/items",
-        headers={"Authorization": f"Bearer {oauth2}"},
-        json={
-            "uris": [
-                uri
-            ],
-            "position": 0
-        },
-        timeout=10
-    )
-    
-    if response.status_code in [200, 201]:
-        return {"success": True, "status": "added"}
-    else:
-        return {"error": "Failed to add track to Spotify playlist", "status": "spotify_error"}
+    try:
+        response = requests.post(
+            f"https://api.spotify.com/v1/playlists/{playlist_id}/items",
+            headers={"Authorization": f"Bearer {oauth2}"},
+            json={
+                "uris": [
+                    uri
+                ],
+                "position": 0
+            },
+            timeout=10
+        )
+        
+        if response.status_code in [200, 201]:
+            print(f"Successfully added track to Spotify playlist: {track_name}", flush=True)
+            return {"success": True, "status": "added"}
+        else:
+            error_msg = f"Spotify API error: {response.status_code} - {response.text}"
+            print(error_msg, file=sys.stderr, flush=True)
+            return {"error": error_msg, "status": "spotify_error"}
+    except Exception as e:
+        error_msg = f"Exception adding track to Spotify: {str(e)}"
+        print(error_msg, file=sys.stderr, flush=True)
+        return {"error": error_msg, "status": "spotify_error"}

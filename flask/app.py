@@ -29,17 +29,17 @@ max_retries = 5
 retry_delay = 2
 for attempt in range(max_retries):
     try:
-        print(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})...")
+        print(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})...", flush=True)
         connect_to_db()
-        print("Database initialized successfully!")
+        print("Database initialized successfully!", flush=True)
         break
     except Exception as e:
-        print(f"Database connection failed: {e}", file=sys.stderr)
+        print(f"Database connection failed: {e}", file=sys.stderr, flush=True)
         if attempt < max_retries - 1:
-            print(f"Retrying in {retry_delay} seconds...")
+            print(f"Retrying in {retry_delay} seconds...", flush=True)
             time.sleep(retry_delay)
         else:
-            print("Failed to connect to database after multiple attempts", file=sys.stderr)
+            print("Failed to connect to database after multiple attempts", file=sys.stderr, flush=True)
             raise
 
 # Initialize Flask-Login

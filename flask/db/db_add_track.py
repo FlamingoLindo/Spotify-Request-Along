@@ -24,7 +24,7 @@ def track_exists_in_db(uri: str) -> bool:
         
         return existing_track is not None
     except Exception as e:
-        print(f"Error checking track in DB: {e}", file=sys.stderr)
+        print(f"Error checking track in DB: {e}", file=sys.stderr, flush=True)
         return False
     finally:
         if conn:
@@ -61,10 +61,10 @@ def db_add_track(uri: str, track_name: str) -> bool:
         conn.commit()
         cur.close()
         
-        print(f"Successfully added track to DB: {track_name}")
+        print(f"Successfully added track to DB: {track_name}", flush=True)
         return True
     except Exception as e:
-        print(f"Error adding track in DB: {e}", file=sys.stderr)
+        print(f"Error adding track in DB: {e}", file=sys.stderr, flush=True)
         if conn:
             conn.rollback()
         return False
