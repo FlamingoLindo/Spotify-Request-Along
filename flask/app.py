@@ -117,7 +117,7 @@ def get_code():
 @spotify.route("/oauth2/authenticate", methods=["POST"])
 @login_required
 def authenticate():
-    """Exchange authorization code for token
+    """Exchange authorization code for token and initialize device cache
     Returns:
         Response: Success or error page
     """
@@ -128,6 +128,15 @@ def authenticate():
         # Store globally in Redis (accessible by all workers)
         redis_client.set("spotify_token", token)
         redis_client.set("spotify_oauth2", str(oauth2_data))
+        
+        # Fetch and cache device ID immediately after authentication
+        try:
+            device_id = available_devices(oauth2=token, force_refresh=True)
+            print(f"Successfully cached device ID during startup: {device_id}", flush=True)
+        except Exception as device_error:
+            # Don't fail authentication if device fetch fails - will retry on first track
+            print(f"Warning: Could not fetch device during startup: {device_error}", file=sys.stderr, flush=True)
+        
         return redirect(url_for('spotify.home'))
     except OAuth2Error as e:
         return render_template('error.html', error=f"OAuth2 error: {str(e)}")
