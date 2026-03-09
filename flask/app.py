@@ -209,24 +209,22 @@ async def play_track(uri: str):
         result = add_track(oauth2=oauth2, uri=uri, track_name=track_name)
         
         is_duplicate = result.get("status") == "duplicate"
+        playlist_add_failed = result.get("status") == "rate_limited"
         
-        # Handle database errors (but not duplicates)
+        # Handle database errors
         if result.get("status") == "db_error":
             return jsonify({"error": result.get("error")}), 500
         
-        # Handle Spotify API errors
+        # Handle other Spotify API errors (not rate limit)
         if result.get("status") == "spotify_error":
-            error_message = result.get("error", "Unknown Spotify error")
-            # Check if it's a rate limit error
-            if result.get("rate_limited") or "429" in error_message or "rate limit" in error_message.lower():
-                return jsonify({
-                    "error": "Too many requests to Spotify. Please wait 30 seconds before trying again.",
-                    "retry_after": 30
-                }), 429
-            return jsonify({"error": error_message}), 500
+            return jsonify({"error": result.get("error")}), 500
+        
+        # If rate limited on playlist add, log it but continue to play
+        if playlist_add_failed:
+            print(f"Playlist add rate limited, will still attempt to queue/play track", flush=True)
 
-        # Only proceed to queue/play if we successfully added or it was a duplicate
-        if not is_duplicate and not result.get("success"):
+        # Only proceed to queue/play if we successfully added, it was a duplicate, or playlist add failed due to rate limit
+        if not is_duplicate and not result.get("success") and not playlist_add_failed:
             return jsonify({"error": "Unexpected error"}), 500
 
         # Add to queue or play (even if duplicate)
@@ -281,6 +279,10 @@ async def play_track(uri: str):
         if is_duplicate:
             msg = "Track already in playlist, added to queue" if queued_successfully else "Track already in playlist (couldn't queue)"
             return jsonify({"success": True, "message": msg}), 200
+        elif playlist_add_failed:
+            msg = "Track queued (playlist rate limited)" if queued_successfully else "Couldn't add to playlist or queue (rate limited)"
+            status_code = 200 if queued_successfully else 429
+            return jsonify({"success": queued_successfully, "message": msg}), status_code
         else:
             msg = "Track added to playlist and queue" if queued_successfully else "Track added to playlist (couldn't queue)"
             return jsonify({"success": True, "message": msg}), 200
