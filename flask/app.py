@@ -7,6 +7,7 @@ import os
 import time
 import sys
 import redis
+import requests
 from requests.exceptions import ReadTimeout, RequestException
 from oauthlib.oauth2 import OAuth2Error
 from spotify.connect import get_oauth2_url, exchange_code_for_token, get_token
@@ -205,12 +206,17 @@ async def play_track(uri: str):
             return jsonify({"error": error_message}), 500
 
         # Add to queue or play (even if duplicate)
-        queue = get_queue(oauth2=oauth2)
+        try:
+            queue = get_queue(oauth2=oauth2)
 
-        if queue == []:
-            play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
-        else:
-            add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
+            if queue == []:
+                play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
+            else:
+                add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                return jsonify({"error": "Spotify rate limit exceeded. Please wait before adding more tracks."}), 429
+            raise
 
         # Return appropriate message
         if is_duplicate:

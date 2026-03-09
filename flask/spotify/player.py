@@ -1,6 +1,7 @@
 """_summary_
     """
 
+import sys
 import requests
 
 
@@ -27,10 +28,10 @@ def transfer_playback(device_id: str, oauth2: str):
 
 
 def play_new_track(context_uri: str, device_id: str, oauth2: str):
-    """_summary_
+    """Play a new track on the specified device.
 
     Returns:
-        _type_: _description_
+        Response: API response
     """
     # First, transfer playback to the device
     transfer_playback(device_id, oauth2)
@@ -46,6 +47,11 @@ def play_new_track(context_uri: str, device_id: str, oauth2: str):
         },
         timeout=10
     )
+    
+    if response.status_code == 429:
+        print(f"Rate limited on play_new_track", file=sys.stderr, flush=True)
+        response.raise_for_status()  # Will raise HTTPError with 429
+    
     return response
 
 

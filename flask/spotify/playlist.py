@@ -2,6 +2,7 @@
     """
 import os
 import sys
+import time
 import requests
 from db.db_add_track import track_exists_in_db, db_add_track
 
@@ -59,33 +60,53 @@ def add_track(oauth2: str, uri: str, track_name: str):
 
     # Add track to Spotify playlist FIRST
     playlist_id = os.getenv("PLAYLIST_ID")
-    try:
-        response = requests.post(
-            f"https://api.spotify.com/v1/playlists/{playlist_id}/items",
-            headers={"Authorization": f"Bearer {oauth2}"},
-            json={
-                "uris": [
-                    uri
-                ],
-                "position": 0
-            },
-            timeout=10
-        )
-        
-        if response.status_code in [200, 201]:
-            print(f"Successfully added track to Spotify playlist: {track_name}", flush=True)
+    
+    # Retry logic for rate limiting
+    max_retries = 3
+    retry_delay = 1  # Start with 1 second
+    
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(
+                f"https://api.spotify.com/v1/playlists/{playlist_id}/items",
+                headers={"Authorization": f"Bearer {oauth2}"},
+                json={
+                    "uris": [
+                        uri
+                    ],
+                    "position": 0
+                },
+                timeout=10
+            )
             
-            # Only add to database if Spotify API succeeded
-            if not db_add_track(uri, track_name):
-                print(f"Warning: Track added to Spotify but failed to save in DB: {track_name}", file=sys.stderr, flush=True)
-                # Still return success since it's in Spotify
+            # Handle rate limiting with retry
+            if response.status_code == 429:
+                retry_after = int(response.headers.get('Retry-After', retry_delay))
+                if attempt < max_retries - 1:
+                    print(f"Rate limited. Retrying in {retry_after} seconds... (attempt {attempt + 1}/{max_retries})", flush=True)
+                    time.sleep(retry_after)
+                    retry_delay *= 2  # Exponential backoff
+                    continue
+                else:
+                    error_msg = f"Spotify API rate limit exceeded after {max_retries} attempts"
+                    print(error_msg, file=sys.stderr, flush=True)
+                    return {"error": error_msg, "status": "spotify_error"}
             
-            return {"success": True, "status": "added"}
-        else:
-            error_msg = f"Spotify API error: {response.status_code} - {response.text}"
+            if response.status_code in [200, 201]:
+                print(f"Successfully added track to Spotify playlist: {track_name}", flush=True)
+                
+                # Only add to database if Spotify API succeeded
+                if not db_add_track(uri, track_name):
+                    print(f"Warning: Track added to Spotify but failed to save in DB: {track_name}", file=sys.stderr, flush=True)
+                    # Still return success since it's in Spotify
+                
+                return {"success": True, "status": "added"}
+            else:
+                error_msg = f"Spotify API error: {response.status_code} - {response.text}"
+                print(error_msg, file=sys.stderr, flush=True)
+                return {"error": error_msg, "status": "spotify_error"}
+                
+        except Exception as e:
+            error_msg = f"Exception adding track to Spotify: {str(e)}"
             print(error_msg, file=sys.stderr, flush=True)
             return {"error": error_msg, "status": "spotify_error"}
-    except Exception as e:
-        error_msg = f"Exception adding track to Spotify: {str(e)}"
-        print(error_msg, file=sys.stderr, flush=True)
-        return {"error": error_msg, "status": "spotify_error"}
