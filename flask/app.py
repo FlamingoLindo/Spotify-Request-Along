@@ -4,6 +4,8 @@
         _type_: _description_
 """
 import os
+import time
+import sys
 import redis
 from requests.exceptions import ReadTimeout, RequestException
 from oauthlib.oauth2 import OAuth2Error
@@ -21,7 +23,24 @@ from db.db_connect import connect_to_db
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
-connect_to_db()
+
+# Initialize database with retry logic
+max_retries = 5
+retry_delay = 2
+for attempt in range(max_retries):
+    try:
+        print(f"Attempting to connect to database (attempt {attempt + 1}/{max_retries})...")
+        connect_to_db()
+        print("Database initialized successfully!")
+        break
+    except Exception as e:
+        print(f"Database connection failed: {e}", file=sys.stderr)
+        if attempt < max_retries - 1:
+            print(f"Retrying in {retry_delay} seconds...")
+            time.sleep(retry_delay)
+        else:
+            print("Failed to connect to database after multiple attempts", file=sys.stderr)
+            raise
 
 # Initialize Flask-Login
 login_manager = LoginManager()
