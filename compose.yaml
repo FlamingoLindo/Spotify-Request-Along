@@ -76,7 +76,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: gunicorn --preload -w 3 -t 60 -b 0.0.0.0:8000 app:app
+    command: gunicorn --preload -w 3 -t 45 --graceful-timeout 30 -b 0.0.0.0:8000 app:app
 
 volumes:
   postgres_data:

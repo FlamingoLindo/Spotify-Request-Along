@@ -5,38 +5,17 @@ import sys
 import requests
 
 
-def transfer_playback(device_id: str, oauth2: str):
-    """Transfer playback to the specified device
+def play_new_track(context_uri: str, device_id: str, oauth2: str):
+    """Play a new track on the specified device.
 
     Args:
-        device_id (str): The device ID to transfer playback to
+        context_uri (str): Spotify track URI
+        device_id (str): Target device ID
         oauth2 (str): OAuth2 token
 
     Returns:
         Response: API response
     """
-    response = requests.put(
-        "https://api.spotify.com/v1/me/player",
-        headers={"Authorization": f"Bearer {oauth2}"},
-        json={
-            "device_ids": [device_id],
-            "play": False
-        },
-        timeout=10
-    )
-    return response
-
-
-def play_new_track(context_uri: str, device_id: str, oauth2: str):
-    """Play a new track on the specified device.
-
-    Returns:
-        Response: API response
-    """
-    # First, transfer playback to the device
-    transfer_playback(device_id, oauth2)
-
-    # Then play the track
     response = requests.put(
         "https://api.spotify.com/v1/me/player/play",
         headers={"Authorization": f"Bearer {oauth2}"},

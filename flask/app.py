@@ -186,7 +186,11 @@ async def play_track(uri: str):
         data = request.get_json()
         track_name = data.get("name", "Unknown Track") if data else "Unknown Track"
 
-        device = available_devices(oauth2=oauth2)
+        # Get device (cached or fresh)
+        try:
+            device = available_devices(oauth2=oauth2)
+        except ConnectionError as e:
+            return jsonify({"error": str(e)}), 503
         
         # Check database and add track to playlist if new
         result = add_track(oauth2=oauth2, uri=uri, track_name=track_name)
@@ -200,12 +204,21 @@ async def play_track(uri: str):
         # Handle Spotify API errors
         if result.get("status") == "spotify_error":
             error_message = result.get("error", "Unknown Spotify error")
-            # Check if it's a rate limit error (429)
-            if "429" in error_message:
-                return jsonify({"error": "Spotify rate limit exceeded. Please wait a moment and try again."}), 429
+            # Check if it's a rate limit error
+            if result.get("rate_limited") or "429" in error_message or "rate limit" in error_message.lower():
+                return jsonify({
+                    "error": "Too many requests to Spotify. Please wait 30 seconds before trying again.",
+                    "retry_after": 30
+                }), 429
             return jsonify({"error": error_message}), 500
 
+        # Only proceed to queue/play if we successfully added or it was a duplicate
+        if not is_duplicate and not result.get("success"):
+            return jsonify({"error": "Unexpected error"}), 500
+
         # Add to queue or play (even if duplicate)
+        queued_successfully = False
+        retry_with_fresh_device = False
         try:
             queue = get_queue(oauth2=oauth2)
 
@@ -213,16 +226,51 @@ async def play_track(uri: str):
                 play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
             else:
                 add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
+            queued_successfully = True
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
-                return jsonify({"error": "Spotify rate limit exceeded. Please wait before adding more tracks."}), 429
-            raise
+                # If we hit rate limit on queue operations but track was added to playlist, still return partial success
+                if not is_duplicate:
+                    return jsonify({
+                        "success": True,
+                        "message": "Track added to playlist, but couldn't queue due to rate limit. Try playing manually.",
+                        "warning": "Queue rate limited"
+                    }), 200
+                else:
+                    return jsonify({
+                        "error": "Spotify queue limit reached. Please wait before adding more tracks.",
+                        "retry_after": 30
+                    }), 429
+            elif e.response.status_code == 404:
+                # Cached device might be invalid, retry with fresh device
+                retry_with_fresh_device = True
+                print(f"Device not found, will retry with fresh device ID", flush=True)
+            else:
+                print(f"HTTPError with queue operations: {e}", file=sys.stderr, flush=True)
+        except Exception as e:
+            print(f"Error with queue operations: {e}", file=sys.stderr, flush=True)
+
+        # Retry with fresh device if needed
+        if retry_with_fresh_device:
+            try:
+                device = available_devices(oauth2=oauth2, force_refresh=True)
+                queue = get_queue(oauth2=oauth2)
+                
+                if queue == []:
+                    play_new_track(context_uri=uri, device_id=device, oauth2=oauth2)
+                else:
+                    add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
+                queued_successfully = True
+            except Exception as e:
+                print(f"Retry with fresh device failed: {e}", file=sys.stderr, flush=True)
 
         # Return appropriate message
         if is_duplicate:
-            return jsonify({"success": True, "message": "Track already in playlist, added to queue"}), 200
+            msg = "Track already in playlist, added to queue" if queued_successfully else "Track already in playlist (couldn't queue)"
+            return jsonify({"success": True, "message": msg}), 200
         else:
-            return jsonify({"success": True, "message": "Track added to playlist and queue"}), 200
+            msg = "Track added to playlist and queue" if queued_successfully else "Track added to playlist (couldn't queue)"
+            return jsonify({"success": True, "message": msg}), 200
     except OAuth2Error as e:
         return jsonify({"error": f"OAuth2 error: {str(e)}"}), 500
     except RequestException as e:
