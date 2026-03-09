@@ -17,9 +17,11 @@ from flask import Flask, render_template, redirect, request, Blueprint, url_for,
 from flask_login import LoginManager, login_required
 from auth.auth import auth_bp
 from auth.models import get_user_by_id
+from db.db_connect import connect_to_db
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY")
+connect_to_db()
 
 # Initialize Flask-Login
 login_manager = LoginManager()
@@ -147,22 +149,41 @@ async def search_tracks():
 
 @spotify.route("/play/<uri>", methods=["PUT"])
 async def play_track(uri: str):
-    """_summary_
+    """Add track to database and playlist, then play/queue it.
 
     Args:
-        uri (str): _description_
+        uri (str): Spotify track URI
 
     Returns:
-        _type_: _description_
+        _type_: JSON response with success or error message
     """
     try:
         oauth2 = redis_client.get("spotify_oauth2")
         if not oauth2:
             return jsonify({"error": "Not authenticated"}), 401
 
-        device = available_devices(oauth2=oauth2)
-        add_track(oauth2=oauth2, uri=uri)
+        # Get track name from request body
+        data = request.get_json()
+        track_name = data.get("name", "Unknown Track") if data else "Unknown Track"
 
+        device = available_devices(oauth2=oauth2)
+        
+        # Check database and add track to playlist if new
+        result = add_track(oauth2=oauth2, uri=uri, track_name=track_name)
+        
+        # Handle duplicate tracks
+        if result.get("status") == "duplicate":
+            return jsonify({"success": False, "message": result.get("error")}), 409
+        
+        # Handle database errors
+        if result.get("status") == "db_error":
+            return jsonify({"error": result.get("error")}), 500
+        
+        # Handle Spotify API errors
+        if result.get("status") == "spotify_error":
+            return jsonify({"error": result.get("error")}), 500
+
+        # Add to queue or play
         queue = get_queue(oauth2=oauth2)
 
         if queue == []:
@@ -170,7 +191,7 @@ async def play_track(uri: str):
         else:
             add_to_the_queue(oauth2=oauth2, uri=uri, device_id=device)
 
-        return jsonify({"success": True, "message": "Track added to queue"}), 200
+        return jsonify({"success": True, "message": "Track added to playlist and queue"}), 200
     except OAuth2Error as e:
         return jsonify({"error": f"OAuth2 error: {str(e)}"}), 500
     except RequestException as e:

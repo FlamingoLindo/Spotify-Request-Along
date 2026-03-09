@@ -80,9 +80,28 @@
       let debounceTimer;
       let controller;
 
-      function playTrack(uri) {
-        fetch(`/spotify/play/${uri}`, { method: "PUT" })
-          .then((res) => res.json())
+      function playTrack(uri, name) {
+        fetch(`/spotify/play/${uri}`, { 
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ name: name })
+        })
+          .then((res) => {
+            if (res.status === 409) {
+              return res.json().then(data => {
+                alert(data.message || "This track is already in the playlist!");
+                throw new Error("Duplicate track");
+              });
+            }
+            if (!res.ok) {
+              return res.json().then(data => {
+                throw new Error(data.error || "Unknown error");
+              });
+            }
+            return res.json();
+          })
           .then((data) => {
             if (data.success) {
               console.log("Track is playing!");
@@ -93,7 +112,12 @@
               console.error("Playback failed:", data.error);
             }
           })
-          .catch((e) => console.error("Playback error:", e));
+          .catch((e) => {
+            if (e.message !== "Duplicate track") {
+              console.error("Playback error:", e);
+              alert("Failed to play track: " + e.message);
+            }
+          });
       }
 
       if (!resultsDiv) {
@@ -145,7 +169,7 @@
                       <span class="track-name">${t.name}</span>
                       <span class="track-sub">${t.artist} · ${t.album}</span>
                     </div>
-                    <span class="track-meta" aria-hidden="true" onclick="event.preventDefault(); event.stopPropagation(); playTrack('${encodeURIComponent(t.uri)}')">Play</span>
+                    <span class="track-meta" aria-hidden="true" onclick="event.preventDefault(); event.stopPropagation(); playTrack('${encodeURIComponent(t.uri)}', '${t.name.replace(/'/g, "\\'")}')">Play</span>
                   </a>
                 `,
               )
