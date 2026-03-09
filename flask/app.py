@@ -123,15 +123,19 @@ def authenticate():
     """
     redirect_url = request.form.get("redirect_url")
     try:
-        oauth2_data = exchange_code_for_token(redirect_url)
-        token = get_token()
-        # Store globally in Redis (accessible by all workers)
-        redis_client.set("spotify_token", token)
-        redis_client.set("spotify_oauth2", str(oauth2_data))
+        # Get user OAuth2 access token
+        user_token = exchange_code_for_token(redirect_url)
         
-        # Fetch and cache device ID immediately after authentication
+        # Get client credentials token (for search API)
+        client_token = get_token()
+        
+        # Store both tokens in Redis
+        redis_client.set("spotify_token", client_token)
+        redis_client.set("spotify_oauth2", user_token)
+        
+        # Fetch and cache device ID immediately after authentication using USER token
         try:
-            device_id = available_devices(oauth2=token, force_refresh=True)
+            device_id = available_devices(oauth2=user_token, force_refresh=True)
             print(f"Successfully cached device ID during startup: {device_id}", flush=True)
         except Exception as device_error:
             # Don't fail authentication if device fetch fails - will retry on first track
