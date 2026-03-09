@@ -200,7 +200,11 @@ async def play_track(uri: str):
         
         # Handle Spotify API errors
         if result.get("status") == "spotify_error":
-            return jsonify({"error": result.get("error")}), 500
+            error_message = result.get("error", "Unknown Spotify error")
+            # Check if it's a rate limit error (429)
+            if "429" in error_message:
+                return jsonify({"error": "Spotify rate limit exceeded. Please wait a moment and try again."}), 429
+            return jsonify({"error": error_message}), 500
 
         # Add to queue or play
         queue = get_queue(oauth2=oauth2)

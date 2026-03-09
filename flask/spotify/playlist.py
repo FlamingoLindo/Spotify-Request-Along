@@ -43,7 +43,7 @@ def get_playlist(oauth2: str, playlist_id: str):
 
 
 def add_track(oauth2: str, uri: str, track_name: str):
-    """Add a track to the database and Spotify playlist if not already present.
+    """Add a track to Spotify playlist first, then to database if successful.
 
     Args:
         oauth2 (str): Spotify OAuth2 token
@@ -57,11 +57,7 @@ def add_track(oauth2: str, uri: str, track_name: str):
     if track_exists_in_db(uri):
         return {"error": "This track is already in the playlist!", "status": "duplicate"}
 
-    # Add track to database
-    if not db_add_track(uri, track_name):
-        return {"error": "Failed to add track to database", "status": "db_error"}
-
-    # Add track to Spotify playlist
+    # Add track to Spotify playlist FIRST
     playlist_id = os.getenv("PLAYLIST_ID")
     try:
         response = requests.post(
@@ -78,6 +74,12 @@ def add_track(oauth2: str, uri: str, track_name: str):
         
         if response.status_code in [200, 201]:
             print(f"Successfully added track to Spotify playlist: {track_name}", flush=True)
+            
+            # Only add to database if Spotify API succeeded
+            if not db_add_track(uri, track_name):
+                print(f"Warning: Track added to Spotify but failed to save in DB: {track_name}", file=sys.stderr, flush=True)
+                # Still return success since it's in Spotify
+            
             return {"success": True, "status": "added"}
         else:
             error_msg = f"Spotify API error: {response.status_code} - {response.text}"

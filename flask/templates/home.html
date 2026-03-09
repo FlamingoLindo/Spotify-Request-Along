@@ -95,6 +95,12 @@
                 throw new Error("Duplicate track");
               });
             }
+            if (res.status === 429) {
+              return res.json().then(data => {
+                alert(data.error || "Too many requests. Please wait a moment and try again.");
+                throw new Error("Rate limited");
+              });
+            }
             if (!res.ok) {
               return res.json().then(data => {
                 throw new Error(data.error || "Unknown error");
@@ -113,7 +119,7 @@
             }
           })
           .catch((e) => {
-            if (e.message !== "Duplicate track") {
+            if (e.message !== "Duplicate track" && e.message !== "Rate limited") {
               console.error("Playback error:", e);
               alert("Failed to play track: " + e.message);
             }
